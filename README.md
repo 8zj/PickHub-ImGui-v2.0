@@ -61,18 +61,6 @@ UI customization and config management:
 
 ---
 
-## Load
-
-Paste this into your executor console:
-
-```lua
-loadstring(game:HttpGet("https://pastefy.app/NPqoo1Jn/raw?cb=" .. tostring(tick())))()
-```
-
-> The `?cb=` cache-bust parameter forces Roblox to always fetch the latest version.
-
----
-
 ## Usage
 
 ```
