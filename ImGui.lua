@@ -3,8 +3,6 @@
     Styled after Dear ImGui with dark theme, accent colors, and clean layout.
 ]]
 
-
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -497,7 +495,7 @@ function Library:AddToggle(config)
     stroke(box, Theme.Border, 1)
 
     local checkmark = Instance.new("TextLabel")
-    checkmark.Text = "✓"
+    checkmark.Text = "âœ“"
     checkmark.Size = UDim2.new(1, 0, 1, 0)
     checkmark.BackgroundTransparency = 1
     checkmark.TextColor3 = Color3.new(1, 1, 1)
@@ -547,7 +545,8 @@ function Library:AddSlider(config)
     local default = config.Default or min
     local value = default
     local suffix = config.Suffix or ""
-    local precise = config.Precise or false
+    local decimals = config.Decimals
+    local precise = decimals ~= nil or config.Precise or false
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 36)
@@ -589,7 +588,15 @@ function Library:AddSlider(config)
     Library:_TrackAccent(fill, "BackgroundColor3")
 
     local function updateDisplay()
-        local display = precise and string.format("%.1f", value) or tostring(math.floor(value))
+        local display
+        if decimals then
+            local places = math.max(0, math.ceil(-math.log10(decimals)))
+            display = string.format("%%.%df", places):format(value)
+        elseif precise then
+            display = string.format("%.1f", value)
+        else
+            display = tostring(math.floor(value))
+        end
         label.Text = (config.Text or "Slider")
         valLabel.Text = display .. suffix
         local pct = math.clamp((value - min) / (max - min), 0, 1)
@@ -617,7 +624,11 @@ function Library:AddSlider(config)
             local absSize = track.AbsoluteSize
             local pct = math.clamp((mouse.X - absPos.X) / absSize.X, 0, 1)
             value = min + (max - min) * pct
-            if not precise then value = math.floor(value) end
+            if decimals then
+                value = math.floor(value / decimals + 0.5) * decimals
+            elseif not precise then
+                value = math.floor(value)
+            end
             updateDisplay()
             if config.Callback then config.Callback(value) end
         end
@@ -662,7 +673,7 @@ function Library:AddDropdown(config)
     label.Parent = frame
 
     local header = Instance.new("TextButton")
-    header.Text = "  " .. selected .. "  ▼"
+    header.Text = "  " .. selected .. "  â–¼"
     header.Size = UDim2.new(1, 0, 0, 24)
     header.BackgroundColor3 = Theme.FrameBg
     header.TextColor3 = Theme.Text
@@ -710,7 +721,7 @@ function Library:AddDropdown(config)
 
             optBtn.MouseButton1Click:Connect(function()
                 selected = opt
-                header.Text = "  " .. selected .. "  ▼"
+                header.Text = "  " .. selected .. "  â–¼"
                 opened = false
                 optionContainer.Visible = false
                 buildOptions()
@@ -729,7 +740,7 @@ function Library:AddDropdown(config)
         Instance = frame,
         Set = function(_, val)
             selected = val
-            header.Text = "  " .. selected .. "  ▼"
+            header.Text = "  " .. selected .. "  â–¼"
             buildOptions()
             if config.Callback then config.Callback(selected) end
         end,
