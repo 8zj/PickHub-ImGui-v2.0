@@ -1301,7 +1301,7 @@ function Library:CreateChat(config)
     local chatFrame = Instance.new("Frame")
     chatFrame.Name = "ChatBox"
     chatFrame.Size = config.Size or UDim2.new(0, 320, 0, 240)
-    chatFrame.Position = config.Position or UDim2.new(1, -334, 1, -254)
+    chatFrame.Position = config.Position or UDim2.new(0, 14, 1, -254)
     chatFrame.BackgroundColor3 = Theme.WindowBg
     chatFrame.BorderSizePixel = 0
     chatFrame.ClipsDescendants = true
@@ -1419,7 +1419,7 @@ function Library:CreateChat(config)
 
     local function addMessage(username, message, color)
         color = color or Theme.Text
-        local timestamp = os.date("%H:%M:%S")
+        local timestamp = os.date("%I:%M %p") -- Local timezone time (12-hour format)
         
         local messageFrame = Instance.new("Frame")
         messageFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -1429,39 +1429,89 @@ function Library:CreateChat(config)
         
         local messageLayout = Instance.new("UIListLayout")
         messageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        messageLayout.Padding = UDim.new(0, 2)
+        messageLayout.Padding = UDim.new(0, 4)
         messageLayout.Parent = messageFrame
 
+        -- Main message container with avatar and content
+        local messageContainer = Instance.new("Frame")
+        messageContainer.Size = UDim2.new(1, 0, 0, 0)
+        messageContainer.AutomaticSize = Enum.AutomaticSize.Y
+        messageContainer.BackgroundTransparency = 1
+        messageContainer.LayoutOrder = 1
+        messageContainer.Parent = messageFrame
+        
+        local containerLayout = Instance.new("UIListLayout")
+        containerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        containerLayout.FillDirection = Enum.FillDirection.Horizontal
+        containerLayout.Padding = UDim.new(0, 8)
+        containerLayout.Parent = messageContainer
+
+        -- Avatar icon (circle)
+        local avatarFrame = Instance.new("Frame")
+        avatarFrame.Size = UDim2.new(0, 32, 0, 32)
+        avatarFrame.BackgroundColor3 = color or Theme.Accent
+        avatarFrame.BorderSizePixel = 0
+        avatarFrame.LayoutOrder = 1
+        avatarFrame.Parent = messageContainer
+        corner(avatarFrame, 16) -- Make it circular
+        
+        -- Avatar text (first letter of username)
+        local avatarLabel = Instance.new("TextLabel")
+        avatarLabel.Text = username:sub(1, 1):upper()
+        avatarLabel.Size = UDim2.new(1, 0, 1, 0)
+        avatarLabel.BackgroundTransparency = 1
+        avatarLabel.TextColor3 = Color3.new(1, 1, 1)
+        avatarLabel.Font = Theme.Font
+        avatarLabel.TextSize = 16
+        avatarLabel.TextXAlignment = Enum.TextXAlignment.Center
+        avatarLabel.TextYAlignment = Enum.TextYAlignment.Center
+        avatarLabel.Parent = avatarFrame
+
+        -- Message content container
+        local contentFrame = Instance.new("Frame")
+        contentFrame.Size = UDim2.new(1, -40, 0, 0)
+        contentFrame.AutomaticSize = Enum.AutomaticSize.Y
+        contentFrame.BackgroundTransparency = 1
+        contentFrame.LayoutOrder = 2
+        contentFrame.Parent = messageContainer
+        
+        local contentLayout = Instance.new("UIListLayout")
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        contentLayout.Padding = UDim.new(0, 2)
+        contentLayout.Parent = contentFrame
+
+        -- Username and timestamp header
         local headerLabel = Instance.new("TextLabel")
-        headerLabel.Size = UDim2.new(1, 0, 0, 14)
+        headerLabel.Size = UDim2.new(1, 0, 0, 16)
         headerLabel.BackgroundTransparency = 1
         headerLabel.Font = Theme.Font
-        headerLabel.TextSize = 11
+        headerLabel.TextSize = 12
         headerLabel.TextXAlignment = Enum.TextXAlignment.Left
         headerLabel.TextWrapped = true
         headerLabel.RichText = true
         headerLabel.LayoutOrder = 1
-        headerLabel.Parent = messageFrame
+        headerLabel.Parent = contentFrame
         
         local userColorHex = string.format("#%02X%02X%02X",
             math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255))
         headerLabel.Text = string.format(
-            '<font color="#555">[%s]</font> <font color="%s"><b>%s:</b></font>',
-            timestamp, userColorHex, username
+            '<font color="%s"><b>%s</b></font><font color="#888">: %s</font>',
+            userColorHex, username, timestamp
         )
 
+        -- Message text
         local messageLabel = Instance.new("TextLabel")
         messageLabel.Size = UDim2.new(1, 0, 0, 0)
         messageLabel.AutomaticSize = Enum.AutomaticSize.Y
         messageLabel.BackgroundTransparency = 1
         messageLabel.TextColor3 = Theme.TextDark
         messageLabel.Font = Theme.Font
-        messageLabel.TextSize = 12
+        messageLabel.TextSize = 13
         messageLabel.TextXAlignment = Enum.TextXAlignment.Left
         messageLabel.TextWrapped = true
         messageLabel.Text = message
         messageLabel.LayoutOrder = 2
-        messageLabel.Parent = messageFrame
+        messageLabel.Parent = contentFrame
 
         table.insert(messages, {Frame = messageFrame, Username = username, Message = message})
         
