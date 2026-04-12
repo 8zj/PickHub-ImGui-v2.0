@@ -1417,8 +1417,64 @@ function Library:CreateChat(config)
     local isMinimized = false
     local messages = {}
     local maxMessages = 100
+    local lastMessageCount = 0
+    local chatEnabled = config.LiveChat ~= false
+    local serverUrl = config.ServerUrl or "" -- e.g., "https://your-server.com/api/chat"
+    local apiKey = config.ApiKey or "" -- Optional API key for authentication
 
-    local function addMessage(username, message, color)
+    -- Live Chat Functions
+    local function sendToServer(username, message, userId)
+        if not chatEnabled or serverUrl == "" then return false end
+        
+        local success, err = pcall(function()
+            local data = HttpService:JSONEncode({
+                username = username,
+                message = message,
+                userId = tostring(userId),
+                timestamp = os.time(),
+                apiKey = apiKey
+            })
+            
+            local response = HttpService:PostAsync(serverUrl .. "/send", data, Enum.HttpContentType.ApplicationJson)
+            return true
+        end)
+        
+        return success
+    end
+
+    local function fetchMessages()
+        if not chatEnabled or serverUrl == "" then return {} end
+        
+        local success, result = pcall(function()
+            local response = HttpService:GetAsync(serverUrl .. "/fetch?apiKey=" .. (apiKey or ""))
+            return HttpService:JSONDecode(response)
+        end)
+        
+        if success and result then
+            return result.messages or {}
+        end
+        return {}
+    end
+
+    -- Polling loop for live chat
+    if chatEnabled and serverUrl ~= "" then
+        task.spawn(function()
+            while chatFrame and chatFrame.Parent do
+                local serverMessages = fetchMessages()
+                if #serverMessages > lastMessageCount then
+                    for i = lastMessageCount + 1, #serverMessages do
+                        local msg = serverMessages[i]
+                        local msgUserId = tonumber(msg.userId) or nil
+                        addMessage(msg.username, msg.message, Theme.Text, msgUserId)
+                    end
+                    lastMessageCount = #serverMessages
+                end
+                task.wait(3) -- Poll every 3 seconds
+            end
+        end)
+    end
+
+    local function addMessage(username, message, color, userId)
         color = color or Theme.Text
         local timestamp = os.date("%I:%M %p")
         
@@ -1447,23 +1503,36 @@ function Library:CreateChat(config)
         containerLayout.Parent = messageContainer
 
         local avatarFrame = Instance.new("Frame")
-        avatarFrame.Size = UDim2.new(0, 32, 0, 32)
+        avatarFrame.Size = UDim2.new(0, 36, 0, 36)
         avatarFrame.BackgroundColor3 = color or Theme.Accent
         avatarFrame.BorderSizePixel = 0
         avatarFrame.LayoutOrder = 1
         avatarFrame.Parent = messageContainer
-        corner(avatarFrame, 16)
+        corner(avatarFrame, 18)
         
-        local avatarLabel = Instance.new("TextLabel")
-        avatarLabel.Text = username:sub(1, 1):upper()
-        avatarLabel.Size = UDim2.new(1, 0, 1, 0)
-        avatarLabel.BackgroundTransparency = 1
-        avatarLabel.TextColor3 = Color3.new(1, 1, 1)
-        avatarLabel.Font = Theme.Font
-        avatarLabel.TextSize = 16
-        avatarLabel.TextXAlignment = Enum.TextXAlignment.Center
-        avatarLabel.TextYAlignment = Enum.TextYAlignment.Center
-        avatarLabel.Parent = avatarFrame
+        -- Try to load avatar image if userId is provided
+        if userId then
+            pcall(function()
+                local thumbnail = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+                local avatarImage = Instance.new("ImageLabel")
+                avatarImage.Size = UDim2.new(1, 0, 1, 0)
+                avatarImage.BackgroundTransparency = 1
+                avatarImage.Image = thumbnail
+                avatarImage.Parent = avatarFrame
+            end)
+        else
+            -- Fallback to first letter
+            local avatarLabel = Instance.new("TextLabel")
+            avatarLabel.Text = username:sub(1, 1):upper()
+            avatarLabel.Size = UDim2.new(1, 0, 1, 0)
+            avatarLabel.BackgroundTransparency = 1
+            avatarLabel.TextColor3 = Color3.new(1, 1, 1)
+            avatarLabel.Font = Theme.Font
+            avatarLabel.TextSize = 18
+            avatarLabel.TextXAlignment = Enum.TextXAlignment.Center
+            avatarLabel.TextYAlignment = Enum.TextYAlignment.Center
+            avatarLabel.Parent = avatarFrame
+        end
 
         local contentFrame = Instance.new("Frame")
         contentFrame.Size = UDim2.new(1, -40, 0, 0)
@@ -1526,11 +1595,15 @@ function Library:CreateChat(config)
         
         local player = game:GetService("Players").LocalPlayer
         local username = player.DisplayName or player.Name
+        local userId = player.UserId
         
-        addMessage(username, text, Theme.Accent)
+        addMessage(username, text, Theme.Accent, userId)
+        
+        -- Send to server if live chat is enabled
+        sendToServer(username, text, userId)
         
         if config.OnMessageSent then
-            config.OnMessageSent(username, text)
+            config.OnMessageSent(username, text, userId)
         end
         
         inputBox.Text = ""
