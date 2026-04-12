@@ -545,8 +545,7 @@ function Library:AddSlider(config)
     local default = config.Default or min
     local value = default
     local suffix = config.Suffix or ""
-    local decimals = config.Decimals
-    local precise = decimals ~= nil or config.Precise or false
+    local precise = config.Precise or false
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, 36)
@@ -588,15 +587,7 @@ function Library:AddSlider(config)
     Library:_TrackAccent(fill, "BackgroundColor3")
 
     local function updateDisplay()
-        local display
-        if decimals then
-            local places = math.max(0, math.ceil(-math.log10(decimals)))
-            display = string.format("%%.%df", places):format(value)
-        elseif precise then
-            display = string.format("%.1f", value)
-        else
-            display = tostring(math.floor(value))
-        end
+        local display = precise and string.format("%.1f", value) or tostring(math.floor(value))
         label.Text = (config.Text or "Slider")
         valLabel.Text = display .. suffix
         local pct = math.clamp((value - min) / (max - min), 0, 1)
@@ -624,11 +615,7 @@ function Library:AddSlider(config)
             local absSize = track.AbsoluteSize
             local pct = math.clamp((mouse.X - absPos.X) / absSize.X, 0, 1)
             value = min + (max - min) * pct
-            if decimals then
-                value = math.floor(value / decimals + 0.5) * decimals
-            elseif not precise then
-                value = math.floor(value)
-            end
+            if not precise then value = math.floor(value) end
             updateDisplay()
             if config.Callback then config.Callback(value) end
         end
@@ -1304,6 +1291,282 @@ function Library:LoadConfig(name)
         end
     end)
     return success, err
+end
+
+function Library:CreateChat(config)
+    config = config or {}
+    local gui = self.Gui
+    if not gui then return end
+
+    local chatFrame = Instance.new("Frame")
+    chatFrame.Name = "ChatBox"
+    chatFrame.Size = config.Size or UDim2.new(0, 320, 0, 240)
+    chatFrame.Position = config.Position or UDim2.new(1, -334, 1, -254)
+    chatFrame.BackgroundColor3 = Theme.WindowBg
+    chatFrame.BorderSizePixel = 0
+    chatFrame.ClipsDescendants = true
+    chatFrame.Parent = gui
+    corner(chatFrame, 4)
+    stroke(chatFrame, Theme.Border, 1)
+
+    local chatAccent = Instance.new("Frame")
+    chatAccent.Size = UDim2.new(1, 0, 0, 2)
+    chatAccent.BackgroundColor3 = Theme.Accent
+    chatAccent.BorderSizePixel = 0
+    chatAccent.Parent = chatFrame
+    Library:_TrackAccent(chatAccent, "BackgroundColor3")
+
+    local chatTitleBar = Instance.new("Frame")
+    chatTitleBar.Size = UDim2.new(1, 0, 0, 24)
+    chatTitleBar.Position = UDim2.new(0, 0, 0, 2)
+    chatTitleBar.BackgroundColor3 = Theme.TitleBg
+    chatTitleBar.BorderSizePixel = 0
+    chatTitleBar.Parent = chatFrame
+
+    local titleText = Instance.new("TextLabel")
+    titleText.Text = config.Title or "Chat"
+    titleText.Size = UDim2.new(1, -60, 1, 0)
+    titleText.Position = UDim2.new(0, 8, 0, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.TextColor3 = Theme.Text
+    titleText.Font = Theme.Font
+    titleText.TextSize = 12
+    titleText.TextXAlignment = Enum.TextXAlignment.Left
+    titleText.Parent = chatTitleBar
+
+    local minimizeBtn = Instance.new("TextButton")
+    minimizeBtn.Text = "_"
+    minimizeBtn.Size = UDim2.new(0, 20, 0, 16)
+    minimizeBtn.Position = UDim2.new(1, -26, 0, 4)
+    minimizeBtn.BackgroundColor3 = Theme.Button
+    minimizeBtn.TextColor3 = Theme.TextDark
+    minimizeBtn.Font = Theme.Font
+    minimizeBtn.TextSize = 10
+    minimizeBtn.BorderSizePixel = 0
+    minimizeBtn.AutoButtonColor = false
+    minimizeBtn.Parent = chatTitleBar
+    corner(minimizeBtn, 3)
+
+    local clearBtn = Instance.new("TextButton")
+    clearBtn.Text = "CLR"
+    clearBtn.Size = UDim2.new(0, 28, 0, 16)
+    clearBtn.Position = UDim2.new(1, -54, 0, 4)
+    clearBtn.BackgroundColor3 = Theme.Button
+    clearBtn.TextColor3 = Theme.TextDark
+    clearBtn.Font = Theme.Font
+    clearBtn.TextSize = 10
+    clearBtn.BorderSizePixel = 0
+    clearBtn.AutoButtonColor = false
+    clearBtn.Parent = chatTitleBar
+    corner(clearBtn, 3)
+
+    makeDraggable(chatFrame, chatTitleBar)
+
+    local messagesScroll = Instance.new("ScrollingFrame")
+    messagesScroll.Size = UDim2.new(1, 0, 1, -50)
+    messagesScroll.Position = UDim2.new(0, 0, 0, 26)
+    messagesScroll.BackgroundTransparency = 1
+    messagesScroll.ScrollBarThickness = 3
+    messagesScroll.ScrollBarImageColor3 = Theme.ScrollBarGrab
+    messagesScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    messagesScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    messagesScroll.BorderSizePixel = 0
+    messagesScroll.Parent = chatFrame
+    padding(messagesScroll, 4, 4, 6, 6)
+    listLayout(messagesScroll, 2)
+
+    local inputContainer = Instance.new("Frame")
+    inputContainer.Size = UDim2.new(1, 0, 0, 24)
+    inputContainer.Position = UDim2.new(0, 0, 1, -24)
+    inputContainer.BackgroundColor3 = Theme.FrameBg
+    inputContainer.BorderSizePixel = 0
+    inputContainer.Parent = chatFrame
+    corner(inputContainer, 3)
+    stroke(inputContainer, Theme.Border, 1)
+
+    local inputBox = Instance.new("TextBox")
+    inputBox.Size = UDim2.new(1, -50, 1, 0)
+    inputBox.Position = UDim2.new(0, 4, 0, 0)
+    inputBox.BackgroundTransparency = 1
+    inputBox.TextColor3 = Theme.Text
+    inputBox.PlaceholderColor3 = Theme.TextDark
+    inputBox.Font = Theme.Font
+    inputBox.TextSize = 12
+    inputBox.TextXAlignment = Enum.TextXAlignment.Left
+    inputBox.PlaceholderText = "Type a message..."
+    inputBox.BorderSizePixel = 0
+    inputBox.ClearTextOnFocus = false
+    inputBox.Parent = inputContainer
+    padding(inputBox, 0, 0, 4, 4)
+
+    local sendBtn = Instance.new("TextButton")
+    sendBtn.Text = "Send"
+    sendBtn.Size = UDim2.new(0, 42, 0, 18)
+    sendBtn.Position = UDim2.new(1, -46, 0.5, -9)
+    sendBtn.BackgroundColor3 = Theme.Accent
+    sendBtn.TextColor3 = Color3.new(1, 1, 1)
+    sendBtn.Font = Theme.Font
+    sendBtn.TextSize = 10
+    sendBtn.BorderSizePixel = 0
+    sendBtn.AutoButtonColor = false
+    sendBtn.Parent = inputContainer
+    corner(sendBtn, 3)
+    Library:_TrackAccent(sendBtn, "BackgroundColor3")
+
+    local isMinimized = false
+    local messages = {}
+    local maxMessages = 100
+
+    local function addMessage(username, message, color)
+        color = color or Theme.Text
+        local timestamp = os.date("%H:%M:%S")
+        
+        local messageFrame = Instance.new("Frame")
+        messageFrame.Size = UDim2.new(1, 0, 0, 0)
+        messageFrame.AutomaticSize = Enum.AutomaticSize.Y
+        messageFrame.BackgroundTransparency = 1
+        messageFrame.Parent = messagesScroll
+        
+        local messageLayout = Instance.new("UIListLayout")
+        messageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        messageLayout.Padding = UDim.new(0, 2)
+        messageLayout.Parent = messageFrame
+
+        local headerLabel = Instance.new("TextLabel")
+        headerLabel.Size = UDim2.new(1, 0, 0, 14)
+        headerLabel.BackgroundTransparency = 1
+        headerLabel.Font = Theme.Font
+        headerLabel.TextSize = 11
+        headerLabel.TextXAlignment = Enum.TextXAlignment.Left
+        headerLabel.TextWrapped = true
+        headerLabel.RichText = true
+        headerLabel.LayoutOrder = 1
+        headerLabel.Parent = messageFrame
+        
+        local userColorHex = string.format("#%02X%02X%02X",
+            math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255))
+        headerLabel.Text = string.format(
+            '<font color="#555">[%s]</font> <font color="%s"><b>%s:</b></font>',
+            timestamp, userColorHex, username
+        )
+
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Size = UDim2.new(1, 0, 0, 0)
+        messageLabel.AutomaticSize = Enum.AutomaticSize.Y
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.TextColor3 = Theme.TextDark
+        messageLabel.Font = Theme.Font
+        messageLabel.TextSize = 12
+        messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+        messageLabel.TextWrapped = true
+        messageLabel.Text = message
+        messageLabel.LayoutOrder = 2
+        messageLabel.Parent = messageFrame
+
+        table.insert(messages, {Frame = messageFrame, Username = username, Message = message})
+        
+        -- Limit messages
+        if #messages > maxMessages then
+            local oldMessage = table.remove(messages, 1)
+            if oldMessage.Frame then oldMessage.Frame:Destroy() end
+        end
+
+        task.defer(function()
+            messagesScroll.CanvasPosition = Vector2.new(0, messagesScroll.AbsoluteCanvasSize.Y)
+        end)
+    end
+
+    local function sendMessage()
+        local text = inputBox.Text:gsub("^%s*(.-)%s*$", "%1") -- Trim whitespace
+        if text == "" then return end
+        
+        local player = game:GetService("Players").LocalPlayer
+        local username = player.DisplayName or player.Name
+        
+        addMessage(username, text, Theme.Accent)
+        
+        if config.OnMessageSent then
+            config.OnMessageSent(username, text)
+        end
+        
+        inputBox.Text = ""
+        inputBox:ReleaseFocus()
+    end
+
+    -- Button interactions
+    sendBtn.MouseButton1Click:Connect(sendMessage)
+    
+    sendBtn.MouseEnter:Connect(function() 
+        tween(sendBtn, {BackgroundColor3 = Theme.Accent:lerp(Color3.new(1, 1, 1), 0.2)}, 0.1) 
+    end)
+    sendBtn.MouseLeave:Connect(function() 
+        tween(sendBtn, {BackgroundColor3 = Theme.Accent}, 0.1) 
+    end)
+    sendBtn.MouseButton1Down:Connect(function() 
+        sendBtn.BackgroundColor3 = Theme.Accent:lerp(Color3.new(0, 0, 0), 0.2) 
+    end)
+    sendBtn.MouseButton1Up:Connect(function() 
+        sendBtn.BackgroundColor3 = Theme.Accent:lerp(Color3.new(1, 1, 1), 0.2) 
+    end)
+
+    clearBtn.MouseButton1Click:Connect(function()
+        for _, c in ipairs(messagesScroll:GetChildren()) do
+            if c:IsA("Frame") then c:Destroy() end
+        end
+        messages = {}
+    end)
+
+    minimizeBtn.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            tween(chatFrame, {Size = UDim2.new(chatFrame.Size.X.Scale, chatFrame.Size.X.Offset, 0, 26)}, 0.2)
+            minimizeBtn.Text = "+"
+            messagesScroll.Visible = false
+            inputContainer.Visible = false
+        else
+            tween(chatFrame, {Size = config.Size or UDim2.new(0, 320, 0, 240)}, 0.2)
+            minimizeBtn.Text = "_"
+            messagesScroll.Visible = true
+            inputContainer.Visible = true
+        end
+    end)
+
+    -- Enter key to send
+    inputBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            sendMessage()
+        end
+    end)
+
+    -- Auto-focus on click
+    inputContainer.MouseButton1Click:Connect(function()
+        inputBox:CaptureFocus()
+    end)
+
+    local chatObj = {}
+    chatObj.Frame = chatFrame
+    chatObj.AddMessage = addMessage
+    chatObj.SendMessage = sendMessage
+    chatObj.Clear = function()
+        for _, c in ipairs(messagesScroll:GetChildren()) do
+            if c:IsA("Frame") then c:Destroy() end
+        end
+        messages = {}
+    end
+    chatObj.SetVisible = function(visible)
+        chatFrame.Visible = visible
+    end
+    chatObj.IsVisible = function()
+        return chatFrame.Visible
+    end
+
+    -- Add welcome message
+    if config.ShowWelcome ~= false then
+        addMessage("System", "Chat initialized! Type a message and press Enter or click Send.", Theme.TextDark)
+    end
+
+    self._Chat = chatObj
+    return chatObj
 end
 
 function Library:ListConfigs()
