@@ -1580,8 +1580,10 @@ function Library:CreateChat(config)
         end
     end)
 
-    inputContainer.MouseButton1Click:Connect(function()
-        inputBox:CaptureFocus()
+    inputContainer.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            inputBox:CaptureFocus()
+        end
     end)
 
     local chatObj = {}
