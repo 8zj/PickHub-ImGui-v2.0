@@ -274,7 +274,7 @@ function Library:CreateWindow(config)
         if gpe then return end
         if input.KeyCode == windowObj._ToggleKey then
             windowObj.Visible = not windowObj.Visible
-            ScreenGui.Enabled = windowObj.Visible
+            Window.Visible = windowObj.Visible
         end
     end)
 
