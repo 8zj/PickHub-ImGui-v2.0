@@ -16,34 +16,34 @@ Library._AccentObjects = {}
 Library._Flags = {}
 
 local Theme = {
-    WindowBg        = Color3.fromRGB(15, 15, 15),
-    TitleBg         = Color3.fromRGB(10, 10, 10),
-    TitleBgActive   = Color3.fromRGB(20, 20, 20),
-    ChildBg         = Color3.fromRGB(22, 22, 22),
-    Border          = Color3.fromRGB(45, 45, 45),
-    FrameBg         = Color3.fromRGB(30, 30, 30),
-    FrameBgHover    = Color3.fromRGB(40, 40, 40),
-    FrameBgActive   = Color3.fromRGB(50, 50, 50),
-    CheckMark       = Color3.fromRGB(255, 50, 50),
-    SliderGrab      = Color3.fromRGB(255, 50, 50),
-    SliderGrabActive= Color3.fromRGB(255, 80, 80),
-    Button          = Color3.fromRGB(35, 35, 35),
-    ButtonHover     = Color3.fromRGB(45, 45, 45),
-    ButtonActive    = Color3.fromRGB(55, 55, 55),
-    Tab             = Color3.fromRGB(25, 25, 25),
-    TabActive       = Color3.fromRGB(35, 35, 35),
-    TabHover        = Color3.fromRGB(45, 45, 45),
-    Accent          = Color3.fromRGB(255, 50, 50),
-    Text            = Color3.fromRGB(220, 220, 220),
-    TextDark        = Color3.fromRGB(128, 128, 128),
-    Separator       = Color3.fromRGB(40, 40, 40),
-    ScrollBar       = Color3.fromRGB(50, 50, 50),
-    ScrollBarGrab   = Color3.fromRGB(80, 80, 80),
-    Font            = Enum.Font.Code,
-    TextSize        = 13,
-    Padding         = 8,
-    ItemSpacing     = 4,
-    CornerRadius    = 3,
+    WindowBg        = Color3.fromRGB(18, 18, 24),
+    TitleBg         = Color3.fromRGB(14, 14, 20),
+    TitleBgActive   = Color3.fromRGB(22, 22, 30),
+    ChildBg         = Color3.fromRGB(24, 24, 32),
+    Border          = Color3.fromRGB(55, 55, 70),
+    FrameBg         = Color3.fromRGB(32, 32, 42),
+    FrameBgHover    = Color3.fromRGB(42, 42, 54),
+    FrameBgActive   = Color3.fromRGB(52, 52, 66),
+    CheckMark       = Color3.fromRGB(255, 71, 87),
+    SliderGrab      = Color3.fromRGB(255, 71, 87),
+    SliderGrabActive= Color3.fromRGB(255, 107, 129),
+    Button          = Color3.fromRGB(40, 40, 52),
+    ButtonHover     = Color3.fromRGB(50, 50, 64),
+    ButtonActive    = Color3.fromRGB(60, 60, 76),
+    Tab             = Color3.fromRGB(28, 28, 36),
+    TabActive       = Color3.fromRGB(38, 38, 48),
+    TabHover        = Color3.fromRGB(48, 48, 60),
+    Accent          = Color3.fromRGB(255, 71, 87),
+    Text            = Color3.fromRGB(235, 235, 245),
+    TextDark        = Color3.fromRGB(148, 148, 164),
+    Separator       = Color3.fromRGB(48, 48, 60),
+    ScrollBar       = Color3.fromRGB(56, 56, 72),
+    ScrollBarGrab   = Color3.fromRGB(88, 88, 112),
+    Font            = Enum.Font.Gotham,
+    TextSize        = 14,
+    Padding         = 12,
+    ItemSpacing     = 6,
+    CornerRadius    = 6,
 }
 
 Library.Theme = Theme
@@ -174,7 +174,7 @@ function Library:CreateWindow(config)
     Window.BorderSizePixel = 0
     Window.ClipsDescendants = true
     Window.Parent = ScreenGui
-    corner(Window, 4)
+    corner(Window, 8)
     stroke(Window, Theme.Border, 1)
 
     local AccentLine = Instance.new("Frame")
@@ -187,11 +187,12 @@ function Library:CreateWindow(config)
 
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, 0, 0, 28)
+    TitleBar.Size = UDim2.new(1, 0, 0, 32)
     TitleBar.Position = UDim2.new(0, 0, 0, 2)
     TitleBar.BackgroundColor3 = Theme.TitleBg
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = Window
+    corner(TitleBar, 8)
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Text = title
@@ -205,53 +206,53 @@ function Library:CreateWindow(config)
     TitleLabel.Parent = TitleBar
 
     local MinBtn = Instance.new("TextButton")
-    MinBtn.Text = "-"
-    MinBtn.Size = UDim2.new(0, 22, 0, 22)
-    MinBtn.Position = UDim2.new(1, -52, 0, 3)
+    MinBtn.Text = "−"
+    MinBtn.Size = UDim2.new(0, 24, 0, 24)
+    MinBtn.Position = UDim2.new(1, -56, 0, 4)
     MinBtn.BackgroundColor3 = Theme.Button
     MinBtn.TextColor3 = Theme.Text
     MinBtn.Font = Theme.Font
     MinBtn.TextSize = 16
     MinBtn.BorderSizePixel = 0
     MinBtn.Parent = TitleBar
-    corner(MinBtn, 3)
+    corner(MinBtn, 6)
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Text = "x"
-    CloseBtn.Size = UDim2.new(0, 22, 0, 22)
-    CloseBtn.Position = UDim2.new(1, -27, 0, 3)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+    CloseBtn.Text = "×"
+    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+    CloseBtn.Position = UDim2.new(1, -28, 0, 4)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 71, 87)
     CloseBtn.TextColor3 = Theme.Text
     CloseBtn.Font = Theme.Font
-    CloseBtn.TextSize = 14
+    CloseBtn.TextSize = 16
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Parent = TitleBar
-    corner(CloseBtn, 3)
+    corner(CloseBtn, 6)
 
     makeDraggable(Window, TitleBar)
 
     local TabBar = Instance.new("Frame")
     TabBar.Name = "TabBar"
-    TabBar.Size = UDim2.new(0, 120, 1, -30)
-    TabBar.Position = UDim2.new(0, 0, 0, 30)
+    TabBar.Size = UDim2.new(0, 130, 1, -34)
+    TabBar.Position = UDim2.new(0, 0, 0, 34)
     TabBar.BackgroundColor3 = Theme.TitleBg
     TabBar.BorderSizePixel = 0
     TabBar.Parent = Window
 
-    local TabBarPad = padding(TabBar, 6, 6, 6, 6)
-    local TabBarLayout = listLayout(TabBar, 2)
+    local TabBarPad = padding(TabBar, 8, 8, 8, 8)
+    local TabBarLayout = listLayout(TabBar, 4)
 
     local TabSep = Instance.new("Frame")
-    TabSep.Size = UDim2.new(0, 1, 1, -30)
-    TabSep.Position = UDim2.new(0, 120, 0, 30)
+    TabSep.Size = UDim2.new(0, 1, 1, -34)
+    TabSep.Position = UDim2.new(0, 130, 0, 34)
     TabSep.BackgroundColor3 = Theme.Border
     TabSep.BorderSizePixel = 0
     TabSep.Parent = Window
 
     local ContentArea = Instance.new("Frame")
     ContentArea.Name = "Content"
-    ContentArea.Size = UDim2.new(1, -121, 1, -30)
-    ContentArea.Position = UDim2.new(0, 121, 0, 30)
+    ContentArea.Size = UDim2.new(1, -131, 1, -34)
+    ContentArea.Position = UDim2.new(0, 131, 0, 34)
     ContentArea.BackgroundTransparency = 1
     ContentArea.BorderSizePixel = 0
     ContentArea.Parent = Window
@@ -306,7 +307,7 @@ function Library:AddTab(name)
     local tabBtn = Instance.new("TextButton")
     tabBtn.Name = name
     tabBtn.Text = name
-    tabBtn.Size = UDim2.new(1, 0, 0, 26)
+    tabBtn.Size = UDim2.new(1, 0, 0, 32)
     tabBtn.BackgroundColor3 = Theme.Tab
     tabBtn.TextColor3 = Theme.TextDark
     tabBtn.Font = Theme.Font
@@ -315,8 +316,8 @@ function Library:AddTab(name)
     tabBtn.BorderSizePixel = 0
     tabBtn.AutoButtonColor = false
     tabBtn.Parent = self.TabBar
-    corner(tabBtn, 3)
-    padding(tabBtn, 0, 0, 8, 0)
+    corner(tabBtn, 6)
+    padding(tabBtn, 0, 0, 10, 0)
 
     local tabContent = Instance.new("ScrollingFrame")
     tabContent.Name = name
@@ -383,12 +384,12 @@ function Library:AddSection(name)
     section.BackgroundColor3 = Theme.ChildBg
     section.BorderSizePixel = 0
     section.Parent = container
-    corner(section, 4)
+    corner(section, 8)
     stroke(section, Theme.Border, 1)
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Text = name or ""
-    titleLabel.Size = UDim2.new(1, 0, 0, 22)
+    titleLabel.Size = UDim2.new(1, 0, 0, 28)
     titleLabel.BackgroundColor3 = Theme.TitleBg
     titleLabel.TextColor3 = Theme.Text
     titleLabel.Font = Theme.Font
@@ -396,22 +397,22 @@ function Library:AddSection(name)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.BorderSizePixel = 0
     titleLabel.Parent = section
-    padding(titleLabel, 0, 0, 8, 0)
+    padding(titleLabel, 0, 0, 12, 0)
 
     local titleCorner = Instance.new("UICorner")
-    titleCorner.CornerRadius = UDim.new(0, 4)
+    titleCorner.CornerRadius = UDim.new(0, 8)
     titleCorner.Parent = titleLabel
 
     local inner = Instance.new("Frame")
     inner.Name = "Inner"
     inner.Size = UDim2.new(1, 0, 0, 0)
-    inner.Position = UDim2.new(0, 0, 0, 24)
+    inner.Position = UDim2.new(0, 0, 0, 28)
     inner.AutomaticSize = Enum.AutomaticSize.Y
     inner.BackgroundTransparency = 1
     inner.Parent = section
 
-    padding(inner, 4, 6, 8, 8)
-    listLayout(inner, 5)
+    padding(inner, 6, 8, 12, 12)
+    listLayout(inner, 8)
 
     local sectionObj = setmetatable({_Container = inner, Window = self.Window or self}, {__index = Library})
     return sectionObj
@@ -443,7 +444,7 @@ function Library:AddButton(config)
     config = config or {}
     local btn = Instance.new("TextButton")
     btn.Text = config.Text or "Button"
-    btn.Size = UDim2.new(1, 0, 0, 26)
+    btn.Size = UDim2.new(1, 0, 0, 32)
     btn.BackgroundColor3 = Theme.Button
     btn.TextColor3 = Theme.Text
     btn.Font = Theme.Font
@@ -451,7 +452,7 @@ function Library:AddButton(config)
     btn.BorderSizePixel = 0
     btn.AutoButtonColor = false
     btn.Parent = self._Container
-    corner(btn, 3)
+    corner(btn, 6)
     stroke(btn, Theme.Border, 1)
 
     btn.MouseEnter:Connect(function() tween(btn, {BackgroundColor3 = Theme.ButtonHover}, 0.1) end)
@@ -471,13 +472,13 @@ function Library:AddToggle(config)
     local state = config.Default or false
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 22)
+    frame.Size = UDim2.new(1, 0, 0, 28)
     frame.BackgroundTransparency = 1
     frame.Parent = self._Container
 
     local label = Instance.new("TextLabel")
     label.Text = config.Text or "Toggle"
-    label.Size = UDim2.new(1, -40, 1, 0)
+    label.Size = UDim2.new(1, -44, 1, 0)
     label.BackgroundTransparency = 1
     label.TextColor3 = Theme.Text
     label.Font = Theme.Font
@@ -486,12 +487,12 @@ function Library:AddToggle(config)
     label.Parent = frame
 
     local box = Instance.new("Frame")
-    box.Size = UDim2.new(0, 16, 0, 16)
-    box.Position = UDim2.new(1, -20, 0.5, -8)
+    box.Size = UDim2.new(0, 18, 0, 18)
+    box.Position = UDim2.new(1, -22, 0.5, -9)
     box.BackgroundColor3 = state and Theme.Accent or Theme.FrameBg
     box.BorderSizePixel = 0
     box.Parent = frame
-    corner(box, 3)
+    corner(box, 4)
     stroke(box, Theme.Border, 1)
 
     local checkmark = Instance.new("TextLabel")
@@ -548,12 +549,12 @@ function Library:AddSlider(config)
     local precise = config.Precise or false
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 36)
+    frame.Size = UDim2.new(1, 0, 0, 42)
     frame.BackgroundTransparency = 1
     frame.Parent = self._Container
 
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 16)
+    label.Size = UDim2.new(1, 0, 0, 18)
     label.BackgroundTransparency = 1
     label.TextColor3 = Theme.Text
     label.Font = Theme.Font
@@ -562,7 +563,7 @@ function Library:AddSlider(config)
     label.Parent = frame
 
     local valLabel = Instance.new("TextLabel")
-    valLabel.Size = UDim2.new(1, 0, 0, 16)
+    valLabel.Size = UDim2.new(1, 0, 0, 18)
     valLabel.BackgroundTransparency = 1
     valLabel.TextColor3 = Theme.TextDark
     valLabel.Font = Theme.Font
@@ -571,19 +572,19 @@ function Library:AddSlider(config)
     valLabel.Parent = frame
 
     local track = Instance.new("Frame")
-    track.Size = UDim2.new(1, 0, 0, 6)
-    track.Position = UDim2.new(0, 0, 0, 24)
+    track.Size = UDim2.new(1, 0, 0, 8)
+    track.Position = UDim2.new(0, 0, 0, 28)
     track.BackgroundColor3 = Theme.FrameBg
     track.BorderSizePixel = 0
     track.Parent = frame
-    corner(track, 3)
+    corner(track, 4)
 
     local fill = Instance.new("Frame")
     fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
     fill.BackgroundColor3 = Theme.Accent
     fill.BorderSizePixel = 0
     fill.Parent = track
-    corner(fill, 3)
+    corner(fill, 4)
     Library:_TrackAccent(fill, "BackgroundColor3")
 
     local function updateDisplay()
@@ -598,8 +599,8 @@ function Library:AddSlider(config)
     local sliding = false
     local clickBtn = Instance.new("TextButton")
     clickBtn.Text = ""
-    clickBtn.Size = UDim2.new(1, 0, 0, 14)
-    clickBtn.Position = UDim2.new(0, 0, 0, 20)
+    clickBtn.Size = UDim2.new(1, 0, 0, 18)
+    clickBtn.Position = UDim2.new(0, 0, 0, 24)
     clickBtn.BackgroundTransparency = 1
     clickBtn.Parent = frame
 
