@@ -9,16 +9,6 @@
     - Watermark, Logger, Notifications
     - Config Save/Load system
     - Accent color customization
-    
-    Usage:
-    1. Load the ImGui library (from GitHub or local file)
-    2. Create a window with your desired settings
-    3. Add tabs to organize your UI
-    4. Add sections within tabs
-    5. Add UI elements to sections
-    6. Use flags to reference elements for config saving
-    
-    Press RightShift to toggle the window visibility
 ]]
 
 -- ============================================================================
